@@ -1,4 +1,4 @@
-use std::{fs, process};
+use std::fs;
 
 #[derive(Default)]
 struct DAY1 {
@@ -34,7 +34,7 @@ impl DAY1 {
                 }
             }).collect();
 
-            let mut result: u32 = u32::default();
+            let result: u32;
             let first = numbers[0];
             let last = numbers.iter().last().unwrap();
             result = first * 10 + last;
