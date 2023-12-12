@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, u128};
 
 #[derive(Default, Debug)]
 struct DAY8 {
@@ -27,45 +27,45 @@ impl DAY8 {
     }
 
     fn to_find(&self) {
-        // let mut splits = self.data.split("\n\n");
-        // let instructions = splits.next().unwrap();
-        // let split_latter = splits.next().unwrap();
-        // let mut nodes: Nodes = Default::default();
-        // split_latter.lines().for_each(|line| {
-        //     // dbg!(line);
-        //     let node: Vec<_> = line.chars().filter(|x| x.is_alphabetic()).collect();
-        //     nodes.inner.push( Node {
-        //         me: String::from_iter(node[0..3].iter()),
-        //         left: String::from_iter(node[3..6].iter()),
-        //         right: String::from_iter(node[6..9].iter()),
-        //     })
-        // });
-        // // dbg!(&nodes);
-        // let mut pointer = 0;
-        // let mut counter_part1 = 0;
-        // for c in instructions.chars().cycle() {
-        //     if &nodes.inner[pointer].me == "ZZZ" {
-        //         break;
-        //     }
-        //     match c {
-        //         'L' => {
-        //             let goto = &nodes.inner[pointer].left;
-        //             let goto_index = nodes.inner.iter().enumerate().filter(|(index, node)| &node.me == goto).next().unwrap();
-        //             pointer = goto_index.0;
-        //             // dbg!(&nodes.inner[pointer]);
-        //             counter_part1 += 1;
-        //         }
-        //         'R' => {
-        //             let goto = &nodes.inner[pointer].right;
-        //             let goto_index = nodes.inner.iter().enumerate().filter(|(index, node)| &node.me == goto).next().unwrap();
-        //             pointer = goto_index.0;
-        //             // dbg!(&nodes.inner[pointer]);
-        //             counter_part1 += 1;
-        //         }
-        //         _ => (),
-        //     }
-        // }
-        // dbg!(counter_part1);
+        let mut splits = self.data.split("\n\n");
+        let instructions = splits.next().unwrap();
+        let split_latter = splits.next().unwrap();
+        let mut nodes: Nodes = Default::default();
+        split_latter.lines().for_each(|line| {
+            // dbg!(line);
+            let node: Vec<_> = line.chars().filter(|x| x.is_alphabetic()).collect();
+            nodes.inner.push( Node {
+                me: String::from_iter(node[0..3].iter()),
+                left: String::from_iter(node[3..6].iter()),
+                right: String::from_iter(node[6..9].iter()),
+            })
+        });
+        // dbg!(&nodes);
+        let mut pointer = 0;
+        let mut counter_part1 = 0;
+        for c in instructions.chars().cycle() {
+            if &nodes.inner[pointer].me == "ZZZ" {
+                break;
+            }
+            match c {
+                'L' => {
+                    let goto = &nodes.inner[pointer].left;
+                    let goto_index = nodes.inner.iter().enumerate().filter(|(index, node)| &node.me == goto).next().unwrap();
+                    pointer = goto_index.0;
+                    // dbg!(&nodes.inner[pointer]);
+                    counter_part1 += 1;
+                }
+                'R' => {
+                    let goto = &nodes.inner[pointer].right;
+                    let goto_index = nodes.inner.iter().enumerate().filter(|(index, node)| &node.me == goto).next().unwrap();
+                    pointer = goto_index.0;
+                    // dbg!(&nodes.inner[pointer]);
+                    counter_part1 += 1;
+                }
+                _ => (),
+            }
+        }
+        dbg!(counter_part1);
 
         let mut splits = self.data.split("\n\n");
         let instructions = splits.next().unwrap();
@@ -82,54 +82,37 @@ impl DAY8 {
         });
 
         let mut starting_pointers: Vec<(usize, &Node)> = nodes.inner.iter().enumerate().filter(|(_, node)| node.me.chars().last().unwrap() == 'A').collect::<Vec<(usize, &Node)>>();
-        dbg!(&starting_pointers);
-        let mut counter_part2 = 0;
-        let mut all_z = false;
-        let mut z_count = 0;
-        for c in instructions.chars().cycle() {
-            z_count = 0;
-            for pointer in &starting_pointers {
-                if pointer.1.me.chars().last().unwrap() == 'Z' {
-                    z_count += 1;
+        // dbg!(&starting_pointers);
+        let mut counter = 0;
+        for index in 0..starting_pointers.iter().count() {
+            let initial = &starting_pointers[index].clone();
+            let mut final_counts: Vec<u128> = Default::default();
+            for c in instructions.chars().cycle() {
+                if starting_pointers[index].1.me.chars().last().unwrap() == 'Z' {
+                    final_counts.push(counter);
+                    println!("{} -> {}: {}", initial.1.me, &starting_pointers[index].1.me, counter);
+                    break;
+                } else {
+                    counter += 1;
                 }
-                if z_count == starting_pointers.iter().count() {
-                    all_z = true;
-                }
-            }
-            if all_z {
-                break;
-            }
-            match c {
-                'L' => {
-                    let mut which_starting_pointer = 0;
-                    for index in 0..starting_pointers.iter().count() {
-                        let pointer = starting_pointers[index];
-                        let goto = &pointer.1.left;
+                match c {
+                    'L' => {
+                        let goto = &starting_pointers[index].1.left;
                         let goto_index = nodes.inner.iter().enumerate().filter(|(_, node)| &node.me == goto).next().unwrap();
-                        starting_pointers[which_starting_pointer] = goto_index;
-                        println!("{} Go To {}", pointer.1.me, goto_index.1.me);
-                        which_starting_pointer += 1;
+                        starting_pointers[index] = goto_index;
+                        // dbg!(&starting_pointers);
                     }
-                    // dbg!(&starting_pointers);
-                    counter_part2 += 1;
-                }
-                'R' => {
-                    let mut which_starting_pointer = 0;
-                    for index in 0..starting_pointers.iter().count() {
-                        let pointer = starting_pointers[index];
-                        let goto = &pointer.1.right;
+                    'R' => {
+                        let goto = &starting_pointers[index].1.right;
                         let goto_index = nodes.inner.iter().enumerate().filter(|(_, node)| &node.me == goto).next().unwrap();
-                        starting_pointers[which_starting_pointer] = goto_index;
-                        println!("{} Go To {}", pointer.1.me, goto_index.1.me);
-                        which_starting_pointer += 1;
+                        starting_pointers[index] = goto_index;
+                        // dbg!(&starting_pointers);
                     }
-                    // dbg!(&starting_pointers);
-                    counter_part2 += 1;
+                    _ => (),
                 }
-                _ => (),
             }
         }
-        dbg!(counter_part2);
+        println!("Not finished yet, calculate the LCM of those numbers online to get the result of part2");
     }
 }
 

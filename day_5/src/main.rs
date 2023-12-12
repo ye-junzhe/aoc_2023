@@ -33,7 +33,7 @@ impl DAY5 {
 
     fn map_to_location(&self) {
         let maps_and_seeds = self.data.split("\n\n").collect::<Vec<&str>>();
-        let mut seeds = maps_and_seeds[0]
+        let seeds = maps_and_seeds[0]
             .split(": ")
             .nth(1).unwrap()
             .split(" ")
@@ -42,25 +42,10 @@ impl DAY5 {
             })
             .collect::<Vec<i64>>();
 
-        let seeds_part2: Vec<_> = maps_and_seeds[0]
-            .split(": ")
-            .nth(1).unwrap()
-            .split(" ")
-            .map(|seed| {
-                seed.parse::<i64>().unwrap()
-            })
-            .collect();
-        let mut seeds_new: Vec<i64> = Default::default();
-        for i in 0..seeds_part2.iter().count() {
-            let seed = seeds_part2[i];
-            if i % 2 == 0 {
-                for n in seed+1..seed + seeds_part2[i + 1] {
-                    seeds_new.push(n);
-                }
-            }
-        }
-        let mut real_seeds_part2: Vec<_> = seeds_part2.iter().enumerate().take_while(|(i, _)| i % 2 == 0).map(|(_, x)| *x).collect();
-        real_seeds_part2.extend(seeds_new);
+        let seed_ranges = seeds
+            .chunks_exact(2)
+            .map(|ele| ele[0]..(ele[0] + ele[1]))
+            .collect::<Vec<_>>();
 
         let mut maps: Maps = Default::default();
 
@@ -116,6 +101,15 @@ impl DAY5 {
         // let lowest_part1 = seeds.iter().min().unwrap();
         // dbg!(lowest_part1);
 
+        let mut real_seeds_part2: Vec<i64> = Default::default();
+        for r in seed_ranges {
+            for seed in r {
+                real_seeds_part2.push(seed);
+            }
+        }
+
+        // TODO: IT TAKES TOO LONG !!!
+        // HASHMAP MIGHT HELP
         for f in 0..maps.map_kinds.iter().count() {
             // println!("Mapping {}", f + 1);
             let map_kind = &maps.map_kinds[f];
