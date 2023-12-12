@@ -33,7 +33,7 @@ impl DAY5 {
 
     fn map_to_location(&self) {
         let maps_and_seeds = self.data.split("\n\n").collect::<Vec<&str>>();
-        let seeds = maps_and_seeds[0]
+        let mut seeds = maps_and_seeds[0]
             .split(": ")
             .nth(1).unwrap()
             .split(" ")
@@ -83,47 +83,59 @@ impl DAY5 {
 
         // dbg!(&seeds);
 
-        // for f in 0..maps.map_kinds.iter().count() {
-        //     // println!("Mapping {}", f + 1);
-        //     let map_kind = &maps.map_kinds[f];
-        //     for i in 0..seeds.iter().count() {
-        //         let seed = seeds[i];
-        //         for map in &map_kind.kind {
-        //             if (map.source..map.source + map.length).contains(&seed) {
-        //                 let mapped = map.dest + seed - map.source;
-        //                 // dbg!(mapped);
-        //                 seeds[i] = mapped;
-        //             }
-        //         }
-        //     }
-        // }
-
-        // let lowest_part1 = seeds.iter().min().unwrap();
-        // dbg!(lowest_part1);
-
-        let mut real_seeds_part2: Vec<i64> = Default::default();
-        for r in seed_ranges {
-            for seed in r {
-                real_seeds_part2.push(seed);
-            }
-        }
-
-        // TODO: IT TAKES TOO LONG !!!
-        // HASHMAP MIGHT HELP
         for f in 0..maps.map_kinds.iter().count() {
             // println!("Mapping {}", f + 1);
             let map_kind = &maps.map_kinds[f];
-            for i in 0..real_seeds_part2.iter().count() {
-                let seed = real_seeds_part2[i];
+            for i in 0..seeds.iter().count() {
+                let seed = seeds[i];
                 for map in &map_kind.kind {
                     if (map.source..map.source + map.length).contains(&seed) {
                         let mapped = map.dest + seed - map.source;
                         // dbg!(mapped);
-                        real_seeds_part2[i] = mapped;
+                        seeds[i] = mapped;
                     }
                 }
             }
         }
+
+        let lowest_part1 = seeds.iter().min().unwrap();
+        dbg!(lowest_part1);
+
+        let mut real_seeds_part2: Vec<i64> = Default::default();
+        for r in seed_ranges {
+            for seed in r {
+                let mut seed = seed;
+                for mapkind in &maps.map_kinds {
+                    for map in &mapkind.kind {
+                        if map.source < seed && seed < map.source + map.length {
+                            let mapped = map.dest + seed - map.source;
+                            // println!("Mapping {} to {}", seed, mapped);
+                            seed = mapped;
+                            real_seeds_part2.push(seed);
+                        }
+                    }
+                }
+            }
+        }
+        // dbg!(&real_seeds_part2);
+
+        // TODO: IT TAKES TOO LONG !!!
+        // HASHMAP MIGHT HELP
+
+        // for f in 0..maps.map_kinds.iter().count() {
+        //     println!("Mapping {}", f + 1);
+        //     let map_kind = &maps.map_kinds[f];
+        //     for i in 0..real_seeds_part2.iter().count() {
+        //         let seed = real_seeds_part2[i];
+        //         for map in &map_kind.kind {
+        //             if (map.source..map.source + map.length).contains(&seed) {
+        //                 let mapped = map.dest + seed - map.source;
+        //                 // dbg!(mapped);
+        //                 real_seeds_part2[i] = mapped;
+        //             }
+        //         }
+        //     }
+        // }
 
         let lowest_part2 = real_seeds_part2.iter().min().unwrap();
         dbg!(lowest_part2);
